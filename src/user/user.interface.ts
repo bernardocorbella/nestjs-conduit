@@ -1,6 +1,6 @@
 export interface UserData {
-  username: string;
   email: string;
+  username: string;
   token: string;
   bio: string;
   image?: string;

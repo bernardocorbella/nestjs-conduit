@@ -6,7 +6,10 @@ import { UserEntity } from './user.entity';
 import { getRepository, Repository } from 'typeorm';
 import { validate } from 'class-validator';
 import * as jwt from 'jsonwebtoken';
+import * as crypto from 'crypto';
 import { SECRET } from '../config';
+import { LoginUserDto } from './dto/login-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -14,6 +17,15 @@ export class UserService {
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
   ) {}
+
+  async findOne(loginUserDto: LoginUserDto): Promise<UserEntity> {
+    const findOneOptions = {
+      email: loginUserDto.email,
+      password: crypto.createHmac('sha256', loginUserDto.password).digest('hex'),
+    };
+
+    return await this.userRepository.findOne(findOneOptions);
+  }
 
   async create(dto: CreateUserDto): Promise<UserRO> {
     // check uniqueness
@@ -26,8 +38,15 @@ export class UserService {
     const user = await qb.getOne();
 
     if (user) {
-      const errors = { username: 'Username and email must be unique' };
-      throw new HttpException({ message: 'Input data validation failed', errors }, HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        {
+          message: 'Input data validation failed',
+          errors: {
+            username: 'Username and email must be unique',
+          },
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     // create new user
@@ -47,6 +66,19 @@ export class UserService {
       const savedUser = await this.userRepository.save(newUser);
       return this.buildUserRO(savedUser);
     }
+  }
+
+  async update(id: string, dto: UpdateUserDto): Promise<UserEntity> {
+    const toUpdate = await this.userRepository.findOne(id);
+    delete toUpdate.password;
+
+    const updated = Object.assign(toUpdate, dto);
+    return await this.userRepository.save(updated);
+  }
+
+  async findByEmail(email: string): Promise<UserRO> {
+    const user = await this.userRepository.findOne({ email });
+    return this.buildUserRO(user);
   }
 
   public generateJWT(user) {
