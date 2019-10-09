@@ -6,7 +6,9 @@ import { UserRO } from './user.interface';
 import { LoginUserDto } from './dto/login-user.dto';
 import { User } from './user.decorator';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ApiImplicitBody, ApiImplicitParam, ApiUseTags } from '@nestjs/swagger';
 
+@ApiUseTags('user')
 @Controller()
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -18,17 +20,21 @@ export class UserController {
 
   @UsePipes(new ValidationPipe())
   @Post('users')
+  @ApiImplicitBody({ name: 'user', type: CreateUserDto})
   async create(@Body('user') createUserData: CreateUserDto) {
     return this.userService.create(createUserData);
   }
 
   @Put('user')
+  @ApiImplicitParam({ name: 'id', type: 'string' })
+  @ApiImplicitBody({ name: 'user', type: UpdateUserDto })
   async update(@User('id') userId: string, @Body('user') userData: UpdateUserDto) {
     return await this.userService.update(userId, userData);
   }
 
   @UsePipes(new ValidationPipe())
   @Post('users/login')
+  @ApiImplicitBody({ name: 'loginUser', type: LoginUserDto })
   async login(@Body('user') loginUserDto: LoginUserDto): Promise<UserRO> {
     const userEntity = await this.userService.findOne(loginUserDto);
 

@@ -9,8 +9,9 @@ async function bootstrap() {
     .setTitle('NestJS Conduit Example App')
     .setDescription('The Conduit API description')
     .setVersion('1.0')
-    .setBasePath('api')
     .addBearerAuth()
+    .addTag('user')
+    .addTag('profile')
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('/docs', app, document);
