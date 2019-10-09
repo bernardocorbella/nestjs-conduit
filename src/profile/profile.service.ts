@@ -33,13 +33,16 @@ export class ProfileService {
   }
 
   async follow(userId: string, username: string): Promise<ProfileRO> {
-    const followingUser = await this.userRepository.findOne({ id: userId });
+    const followingUser = await this.userRepository.findOne({ username });
 
     if (followingUser.id === userId) {
       throw new HttpException(`Can't follow yourself`, HttpStatus.BAD_REQUEST);
     }
 
-    const followsEntity = await this.followsRepository.findOne({ followerId: userId, followingId: followingUser.id });
+    const followsEntity = await this.followsRepository.findOne({
+      followerId: userId,
+      followingId: followingUser.id,
+    });
 
     if (!followsEntity) {
       const follows = new FollowsEntity();
@@ -53,6 +56,25 @@ export class ProfileService {
       bio: followingUser.bio,
       image: followingUser.image,
       following: true,
+    };
+
+    return { profile };
+  }
+
+  async unFollow(userId: string, username: string): Promise<ProfileRO> {
+    const followingUser = await this.userRepository.findOne({ username });
+
+    if (followingUser.id === userId) {
+      throw new HttpException(`You can't unfollow yourself`, HttpStatus.BAD_REQUEST);
+    }
+    const followingId = followingUser.id;
+    await this.followsRepository.delete({ followerId: userId, followingId });
+
+    const profile: ProfileData = {
+      username: followingUser.username,
+      bio: followingUser.bio,
+      image: followingUser.image,
+      following: false,
     };
 
     return { profile };

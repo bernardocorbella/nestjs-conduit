@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Post, Put, UsePipes } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto, CreateUserRequest } from './dto/create-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 import { ValidationPipe } from '../shared/validation.pipe';
 import { UserRO } from './user.interface';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -20,7 +20,6 @@ export class UserController {
 
   @UsePipes(new ValidationPipe())
   @Post('users')
-  @ApiImplicitBody({ name: 'user', type: CreateUserDto })
   async create(@Body('user') createUserData: CreateUserDto) {
     return this.userService.create(createUserData);
   }

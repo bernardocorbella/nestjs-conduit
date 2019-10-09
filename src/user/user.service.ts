@@ -69,7 +69,7 @@ export class UserService {
   }
 
   async update(id: string, dto: UpdateUserDto): Promise<UserEntity> {
-    const toUpdate = await this.userRepository.findOne(id);
+    const toUpdate = await this.userRepository.findOne({ id });
     delete toUpdate.password;
 
     const updated = Object.assign(toUpdate, dto);

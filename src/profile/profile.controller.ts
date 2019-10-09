@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiUseTags } from '@nestjs/swagger';
 import { ProfileRO } from './profile.interface';
 import { ProfileService } from './profile.service';
@@ -16,7 +16,12 @@ export class ProfileController {
   }
 
   @Post(':username/follow')
-  async follow(@User('id') id: string, @Param('username') username: string): Promise<ProfileRO> {
-    return await this.profileService.follow(id, username);
+  async follow(@User('id') userId: string, @Param('username') username: string): Promise<ProfileRO> {
+    return await this.profileService.follow(userId, username);
+  }
+
+  @Delete(':username/follow')
+  async unFollow(@User('id') id: string, @Param('username') username: string): Promise<ProfileRO> {
+    return await this.profileService.unFollow(id, username);
   }
 }
